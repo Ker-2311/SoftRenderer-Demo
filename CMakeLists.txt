@@ -20,6 +20,6 @@ include_directories("${PROJECT_SOURCE_DIR}/Render")
 include(CTest)
 
 # 添加子目录
-add_subdirectory(Render)
+add_subdirectory(Renderer)
 add_subdirectory(Tests)
 
