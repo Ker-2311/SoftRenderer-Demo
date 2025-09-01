@@ -15,7 +15,7 @@ else()
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
 
-include_directories("${PROJECT_SOURCE_DIR}/Render")
+include_directories("${PROJECT_SOURCE_DIR}/Renderer")
 
 include(CTest)
 

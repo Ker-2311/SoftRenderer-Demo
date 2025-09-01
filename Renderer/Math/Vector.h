@@ -256,6 +256,7 @@ namespace EternalEngine::Math
 	typedef Vector4Type<float> Vector4f;
 	typedef Vector4Type<int> Vector4i;
 	typedef Vector4Type<float> Quaternion;
+	typedef Vector4Type<float> Color;
 
 	// 定义一些全局的函数
 	namespace Vector
