@@ -1,0 +1,16 @@
+#pragma once
+#include <vector>
+#include "Vertex.h"
+
+using namespace std;
+
+
+class Mesh
+{
+public:
+    vector<Vertex> vertexBuffer;
+    vector<Vector3f> indexBuffer;
+    
+private:
+
+};
