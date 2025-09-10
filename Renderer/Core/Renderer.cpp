@@ -32,7 +32,7 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1,COLORREF color)
     int dx = x1 - x0;
     int dy = abs(y1 - y0);
 
-    int error = dx / 2;
+    int error = dx;
     int ystep = (y0 < y1) ? 1 : -1;
     int y = y0;
 
@@ -47,11 +47,11 @@ void Renderer::DrawLine(int x0, int y0, int x1, int y1,COLORREF color)
             DrawPixel(x,y,color);
         }
 
-        error -= dy;
+        error -= 2* dy;
         if (error < 0)
         {
             y += ystep;
-            error += dx;
+            error += 2*dx;
         }
     }
 }
