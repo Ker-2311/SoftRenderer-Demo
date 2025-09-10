@@ -35,6 +35,8 @@ public:
     // 系统信息
     static int GetScreenWidth();
     static int GetScreenHeight();
+
+    static HWND GetHWND() {return s_hWnd;}
     
 private:
     static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
