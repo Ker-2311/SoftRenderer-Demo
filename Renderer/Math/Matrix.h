@@ -99,7 +99,6 @@ struct Matrix
         }
         return result;
     }
-
     // ####### 标量乘/除法 #######
     // 矩阵乘标量
     Matrix operator*(T scalar) const

@@ -36,6 +36,7 @@ int main()
 
     Matrix<float, 3, 2> m1 = {1, 2, 3, 4, 5, 6};
     Matrix<float, 2, 3> m2 = {1, 2, 3, 4, 5, 6};
+    Matrix3x3f m3 = {1,2,3,4,5,6,7,8,9};
     cout << "m1：" << endl;
     m1.Print();
     cout << "m2：" << endl;
@@ -46,4 +47,8 @@ int main()
 
     cout << "m1 transpose:" << endl;
     m1.Transpose().Print();
+
+    // 只允许右乘
+    Vector3f va2 = (va1 * m3);
+    cout << " m3*va1:" << va2.x << va2.y << va2.z<< endl;
 }

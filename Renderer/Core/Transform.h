@@ -2,12 +2,11 @@
 #include "Math/Matrix.h"
 class Transform
 {
-private:
+public:
     Vector3f position = Vector3f(0, 0, 0);
     Vector3f rotation = Vector3f(0, 0, 0);
     Vector3f scale = Vector3f(1, 1, 1);
 
-public:
     void Translate(const Vector3f &v) { position = position + v; }
     void RotateX(float angle) { rotation = rotation + Vector3f(angle, 0, 0); }
     void RotateY(float angle) { rotation = rotation + Vector3f(0, angle, 0); }
@@ -29,6 +28,7 @@ public:
 
         return S * R * T;
     }
+    Matrix4x4f GetRotationMatrix() {return CreateRotationMatrix(rotation);}
     Transform(Vector3f pos, Vector3f rot, Vector3f s) : position(pos), rotation(rot), scale(s) {}
     Transform();
 

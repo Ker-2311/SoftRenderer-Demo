@@ -1,5 +1,6 @@
 #pragma once
 #include <iterator>
+#include "Matrix.h"
 
 // 定义通用Vector类型，使用CRTP模式
 template <typename T, size_t N, typename Derived>
@@ -111,6 +112,23 @@ struct VectorTypeBase
 			res.data[i] = data[i] / value;
 		}
 		return res;
+	}
+
+	// 向量乘矩阵
+	template <size_t OtherCol>
+	Derived operator*(const Matrix<T, N, OtherCol> &mat) const
+	{
+		static_assert(N == OtherCol, "Vector dimension must match matrix column count");
+		Derived result;
+		for (size_t i = 0; i < N; ++i)
+		{
+			result.data[i] = static_cast<T>(0);
+			for (size_t j = 0; j < N; ++j)
+			{
+				result.data[i] += data[j] * mat.data[j][i]; // 注意矩阵访问顺序
+			}
+		}
+		return result;
 	}
 
 	// #######通用向量操作#######
