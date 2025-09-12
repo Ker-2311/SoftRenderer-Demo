@@ -9,7 +9,9 @@ int WINAPI WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-    if (!WindowsPlatform::CreateApplicationWindow(L"Soft Renderer", 2000, 1000))
+    int width = 2000;
+    int height = 1000;
+    if (!WindowsPlatform::CreateApplicationWindow(L"Soft Renderer", width, height))
     {
         std::cerr << "Failed to create application window!" << std::endl;
         return -1;
@@ -17,9 +19,10 @@ int WINAPI WinMain(
 
     double lastTime = WindowsPlatform::GetHighResolutionTime();
     HWND hwnd = WindowsPlatform::GetHWND();
-    HDC  hdc = GetDC(hwnd);
+    HDC hdc = GetDC(hwnd);
     Renderer renderer(hdc);
-    renderer.DrawLine(0,0,1000,1000,RGB(0,255,255));
+    // renderer.DrawLine(0,0,1000,1000,RGB(0,255,255),RGB(255,0,0));
+    
 
     while (WindowsPlatform::ProcessMessages())
     {
@@ -32,6 +35,10 @@ int WINAPI WinMain(
         if (WindowsPlatform::IsKeyPressed(VK_ESCAPE))
         {
             break;
+        }
+        else if (WindowsPlatform::IsKeyPressed(VK_SPACE))
+        {
+            renderer.DrawTriangle(width / 2, height / 4, width / 4, height * 3 / 4, width * 3 / 4, height * 3 / 4, RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255));
         }
     }
 

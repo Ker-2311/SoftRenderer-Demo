@@ -121,12 +121,12 @@ Vector3f Renderer::CalculateBarycentric(int x0, int y0, int x1, int y1, int x2, 
     Vector2i vp(xp - x0, yp - y0);
 
     // 解线性方程
-    int d00 = v0.Dot(v0);
-    int d01 = v0.Dot(v1);
-    int d10 = v1.Dot(v0);
-    int d11 = v1.Dot(v1);
-    int c0 = vp.Dot(v0);
-    int c1 = vp.Dot(v1);
+    int64_t  d00 = v0.Dot(v0);
+    int64_t  d01 = v0.Dot(v1);
+    int64_t  d10 = v1.Dot(v0);
+    int64_t  d11 = v1.Dot(v1);
+    int64_t  c0 = vp.Dot(v0);
+    int64_t  c1 = vp.Dot(v1);
 
     float det = d11 * d00 - d01 * d10;
     float det1 = d11 * c0 - d01 * c1;
