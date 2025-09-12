@@ -99,48 +99,71 @@ void Renderer::DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, COLO
     {
         for (int i = xMin; i <= xMax; i++)
         {
-            Vector3f baryCentric = CalculateBarycentric(x0, y0, x1, y1, x2, y2, i, j);
-            bool isInside = (baryCentric.x >= -1e-6f) && (baryCentric.y >= -1e-6f) && (baryCentric.z >= -1e-6f);
-            if (!isInside)
+            if (!PointInTriangleFastCheck(x0, y0, x1, y1, x2, y2, i, j))
                 continue;
+
+            Vector3f baryCentric = CalculateBarycentric(x0, y0, x1, y1, x2, y2, i, j);
 
             BYTE r = static_cast<BYTE>(r0 * baryCentric.x + r1 * baryCentric.y + r2 * baryCentric.z);
             BYTE g = static_cast<BYTE>(g0 * baryCentric.x + g1 * baryCentric.y + g2 * baryCentric.z);
             BYTE b = static_cast<BYTE>(b0 * baryCentric.x + b1 * baryCentric.y + b2 * baryCentric.z);
 
-            COLORREF color = RGB(r,g,b);
-            DrawPixel(i,j,color);
+            COLORREF color = RGB(r, g, b);
+            DrawPixel(i, j, color);
         }
     }
 }
 
-Vector3f Renderer::CalculateBarycentric(int x0, int y0, int x1, int y1, int x2, int y2, int xp, int yp)
+Vector3f inline Renderer::CalculateBarycentric(int x0, int y0, int x1, int y1, int x2, int y2, int xp, int yp) noexcept
 {
-    Vector2i v0(x1 - x0, y1 - y0);
-    Vector2i v1(x2 - x0, y2 - y0);
-    Vector2i vp(xp - x0, yp - y0);
+    // Vector2i v0(x1 - x0, y1 - y0);
+    // Vector2i v1(x2 - x0, y2 - y0);
+    // Vector2i vp(xp - x0, yp - y0);
 
-    // 解线性方程
-    int64_t  d00 = v0.Dot(v0);
-    int64_t  d01 = v0.Dot(v1);
-    int64_t  d10 = v1.Dot(v0);
-    int64_t  d11 = v1.Dot(v1);
-    int64_t  c0 = vp.Dot(v0);
-    int64_t  c1 = vp.Dot(v1);
+    // // 解线性方程
+    // int64_t  d00 = v0.Dot(v0);
+    // int64_t  d01 = v0.Dot(v1);
+    // int64_t  d10 = v1.Dot(v0);
+    // int64_t  d11 = v1.Dot(v1);
+    // int64_t  c0 = vp.Dot(v0);
+    // int64_t  c1 = vp.Dot(v1);
 
-    float det = d11 * d00 - d01 * d10;
-    float det1 = d11 * c0 - d01 * c1;
-    float det2 = c1 * d00 - c0 * d10;
+    // float det = d11 * d00 - d01 * d10;
+    // float det1 = d11 * c0 - d01 * c1;
+    // float det2 = c1 * d00 - c0 * d10;
 
-    // 无解
-    if (std::abs(det) < 1e-6f)
-    {
-        return Vector3f(-1, -1, -1); // 返回无效坐标
-    }
+    // // 无解
+    // if (std::abs(det) < 1e-6f)
+    // {
+    //     return Vector3f(-1, -1, -1); // 返回无效坐标
+    // }
 
-    // 克拉默法则
-    float beta = det1 / det;
-    float gamma = det2 / det;
-    float alpha = 1 - beta - gamma;
+    // // 克拉默法则
+    // float beta = det1 / det;
+    // float gamma = det2 / det;
+    // float alpha = 1 - beta - gamma;
+    // return Vector3f(alpha, beta, gamma);
+
+    // 优化版本
+    float detT = static_cast<float>((y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2));
+    if (fabs(detT) < 1e-6f)
+        return Vector3f(-1, -1, -1);
+
+    float alpha = ((y1 - y2) * (xp - x2) + (x2 - x1) * (yp - y2)) / detT;
+    float beta = ((y2 - y0) * (xp - x2) + (x0 - x2) * (yp - y2)) / detT;
+    float gamma = 1.0f - alpha - beta;
+
     return Vector3f(alpha, beta, gamma);
+}
+
+bool inline Renderer::PointInTriangleFastCheck(int x0, int y0, int x1, int y1, int x2, int y2, int xp, int yp) noexcept
+{
+    // 使用整数运算避免浮点数开销
+    int64_t d1 = (xp - x0) * (y1 - y0) - (yp - y0) * (x1 - x0);
+    int64_t d2 = (xp - x1) * (y2 - y1) - (yp - y1) * (x2 - x1);
+    int64_t d3 = (xp - x2) * (y0 - y2) - (yp - y2) * (x0 - x2);
+
+    // 检查符号是否一致（允许在边上）
+    return ((d1 >= 0 && d2 >= 0 && d3 >= 0) ||
+            (d1 <= 0 && d2 <= 0 && d3 <= 0));
 }
