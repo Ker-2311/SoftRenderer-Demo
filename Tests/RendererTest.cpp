@@ -9,8 +9,9 @@ int WINAPI WinMain(
     LPSTR lpCmdLine,
     int nCmdShow)
 {
-    int width = 2000;
-    int height = 1000;
+    // 16：9
+    int width = 1600;
+    int height = 900;
     if (!WindowsPlatform::CreateApplicationWindow(L"Soft Renderer", width, height))
     {
         std::cerr << "Failed to create application window!" << std::endl;
