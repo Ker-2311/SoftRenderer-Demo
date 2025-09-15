@@ -1,12 +1,166 @@
 #include "Renderer.h"
 
-Renderer::Renderer(HDC hdc) : _hdc(hdc)
+Renderer::Renderer(HDC hdc) : m_hdc(hdc)
 {
+    m_width = GetDeviceCaps(hdc, HORZRES);
+    m_height = GetDeviceCaps(hdc, VERTRES);
+}
+
+void Renderer::VertexShaderStage(const vector<Vertex> &vertexList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
+{
+    outputList.resize(vertexList.size());
+    for (int i = 0; i < vertexList.size(); i++)
+    {
+        shared_ptr<BaseVertexOutput> vertexOutput = shader->Process(vertexList[i]);
+        // 透视除法
+        float w = vertexOutput->oPos.w;
+        vertexOutput->oPos = vertexOutput->oPos / w;
+        // 保存w值用于透视矫正
+        vertexOutput->oPos.w = w;
+        outputList[i] = vertexOutput;
+    }
+}
+
+void Renderer::PrimitiveAssembly(const vector<shared_ptr<BaseVertexOutput>> &vertexOutputList, const vector<Vector3i> &indexList, vector<shared_ptr<Triangle>> &primitiveList)
+{
+    primitiveList.resize(indexList.size());
+    for (int i = 0; i < indexList.size(); i++)
+    {
+        Vector3i index = indexList[i];
+        shared_ptr<BaseVertexOutput> v0 = vertexOutputList[index.x];
+        shared_ptr<BaseVertexOutput> v1 = vertexOutputList[index.y];
+        shared_ptr<BaseVertexOutput> v2 = vertexOutputList[index.z];
+        primitiveList[i] = make_shared<Triangle>(v0, v1, v2);
+    }
+}
+
+void Renderer::ClipStage(vector<shared_ptr<Triangle>> &primitiveList)
+{
+    vector<shared_ptr<Triangle>> clippedTriangles;
+
+    for (const auto &triangle : primitiveList)
+    {
+        auto v0 = triangle->V0;
+        auto v1 = triangle->V1;
+        auto v2 = triangle->V2;
+
+        // 检查三角形是否完全在视锥体外
+        if (IsTriangleOutsideFrustum(v0->oPos, v1->oPos, v2->oPos))
+        {
+            continue; // 丢弃
+        }
+
+        // 检查是否需要裁剪
+        if (IsTriangleInsideFrustum(v0->oPos, v1->oPos, v2->oPos))
+        {
+            clippedTriangles.push_back(triangle); // 完全在视锥体内，直接保留
+        }
+        else
+        {
+            // 进行裁剪（Sutherland-Hodgman 算法）
+            vector<Vector4f> polygon = {v0->oPos, v1->oPos, v2->oPos};
+            ClipPolygon(polygon);
+
+            // 将裁剪后的多边形拆分成三角形
+            for (size_t i = 1; i + 1 < polygon.size(); i++)
+            {
+                auto newV0 = make_shared<BaseVertexOutput>(*v0);
+                auto newV1 = make_shared<BaseVertexOutput>(*v1);
+                auto newV2 = make_shared<BaseVertexOutput>(*v2);
+
+                newV0->oPos = polygon[0];
+                newV1->oPos = polygon[i];
+                newV2->oPos = polygon[i + 1];
+
+                clippedTriangles.push_back(make_shared<Triangle>(newV0, newV1, newV2));
+            }
+        }
+    }
+
+    primitiveList = std::move(clippedTriangles); // 替换为裁剪后的三角形
+}
+
+void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vector<shared_ptr<PixelInput>> &outputList)
+{
+    for (int i = 0; i < primitiveList.size(); i++)
+    {
+        shared_ptr<Triangle> triangle = primitiveList[i];
+        // TODO: 背面剔除
+
+        // 透视矫正插值
+        shared_ptr<BaseVertexOutput> v0 = triangle->V0;
+        shared_ptr<BaseVertexOutput> v1 = triangle->V1;
+        shared_ptr<BaseVertexOutput> v2 = triangle->V2;
+
+        // 转换为屏幕坐标
+        int x0 = static_cast<int>((v0->oPos.x + 1.0f) * m_width / 2.0f);
+        int y0 = static_cast<int>((v0->oPos.y + 1.0f) * m_height / 2.0f);
+        int x1 = static_cast<int>((v1->oPos.x + 1.0f) * m_width / 2.0f);
+        int y1 = static_cast<int>((v1->oPos.y + 1.0f) * m_height / 2.0f);
+        int x2 = static_cast<int>((v2->oPos.x + 1.0f) * m_width / 2.0f);
+        int y2 = static_cast<int>((v2->oPos.y + 1.0f) * m_height / 2.0f);
+
+        // 创建包围盒
+        int xMax = max(max(x0, x1), x2);
+        int yMax = max(max(y0, y1), y2);
+        int xMin = min(min(x0, x1), x2);
+        int yMin = min(min(y0, y1), y2);
+
+        // 确保在屏幕范围内
+        xMin = max(xMin, 0);
+        yMin = max(yMin, 0);
+        xMax = min(xMax, m_width - 1);
+        yMax = min(yMax, m_height - 1);
+
+        // 遍历包围盒中的每个像素
+        for (int y = yMin; y <= yMax; y++)
+        {
+            for (int x = xMin; x <= xMax; x++)
+            {
+                // 快速检查是否在三角形内
+                if (!PointInTriangleFastCheck(x0, y0, x1, y1, x2, y2, x, y))
+                    continue;
+
+                // 计算重心坐标
+                Vector3f bary = CalculateBarycentric(x0, y0, x1, y1, x2, y2, x, y);
+                float alpha = bary.x;
+                float beta = bary.y;
+                float gamma = bary.z;
+
+                // 计算1/w的插值
+                float invW0 = 1.0f / v0->oPos.w;
+                float invW1 = 1.0f / v1->oPos.w;
+                float invW2 = 1.0f / v2->oPos.w;
+                float invW = alpha * invW0 + beta * invW1 + gamma * invW2;
+                float w = 1.0f / invW;
+
+                // 创建像素输入数据
+                auto pixelInput = make_shared<PixelInput>();
+                pixelInput->iPos = Vector2i(x, y);
+                pixelInput->depth = alpha * v0->oPos.z + beta * v1->oPos.z + gamma * v2->oPos.z;
+
+                // 透视矫正插值所有顶点属性
+                for (auto &[type, attr] : v0->attributes)
+                {
+                    // 获取三个顶点的属性值
+                    Vector4f attr0 = v0->attributes[type];
+                    Vector4f attr1 = v1->attributes[type];
+                    Vector4f attr2 = v2->attributes[type];
+
+                    // 透视矫正插值
+                    Vector4f interpolated = (attr0 * invW0 * alpha + attr1 * beta * invW1 + attr2 * gamma * invW2) * w;
+                    pixelInput->attributes[type] = interpolated;
+                }
+
+                outputList.push_back(pixelInput);
+            }
+        }
+    }
 }
 
 void Renderer::DrawPixel(int x, int y, COLORREF color)
 {
-    SetPixel(_hdc, x, y, color);
+    SetPixel(m_hdc, x, y, color);
 }
 
 void Renderer::DrawLine(int x0, int y0, int x1, int y1, COLORREF color0, COLORREF color1)
@@ -111,6 +265,77 @@ void Renderer::DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, COLO
             COLORREF color = RGB(r, g, b);
             DrawPixel(i, j, color);
         }
+    }
+}
+
+bool Renderer::IsTriangleOutsideFrustum(const Vector4f &v0, const Vector4f &v1, const Vector4f &v2)
+{
+    // 检查是否所有顶点都在某个裁剪平面外
+    auto isOutside = [](float x, float y, float z)
+    {
+        return (x < -1.0f && y < -1.0f && z < -1.0f) ||
+               (x > 1.0f && y > 1.0f && z > 1.0f);
+    };
+
+    return isOutside(v0.x, v0.y, v0.z) &&
+           isOutside(v1.x, v1.y, v1.z) &&
+           isOutside(v2.x, v2.y, v2.z);
+}
+
+bool Renderer::IsTriangleInsideFrustum(const Vector4f &v0, const Vector4f &v1, const Vector4f &v2)
+{
+    auto isInside = [](float x, float y, float z)
+    {
+        return (x >= -1.0f && x <= 1.0f) &&
+               (y >= -1.0f && y <= 1.0f) &&
+               (z >= -1.0f && z <= 1.0f);
+    };
+
+    return isInside(v0.x, v0.y, v0.z) &&
+           isInside(v1.x, v1.y, v1.z) &&
+           isInside(v2.x, v2.y, v2.z);
+}
+
+void Renderer::ClipPolygon(vector<Vector4f> &polygon)
+{
+    // 定义裁剪平面（x=-1, x=1, y=-1, y=1, z=-1, z=1）
+    const vector<pair<Vector4f, Vector4f>> clipPlanes = {
+        {Vector4f(1.0f, 0.0f, 0.0f, 1.0f), Vector4f(-1.0f, 0.0f, 0.0f, 1.0f)}, // x = -1
+        {Vector4f(-1.0f, 0.0f, 0.0f, 1.0f), Vector4f(1.0f, 0.0f, 0.0f, 1.0f)}, // x = 1
+        {Vector4f(0.0f, 1.0f, 0.0f, 1.0f), Vector4f(0.0f, -1.0f, 0.0f, 1.0f)}, // y = -1
+        {Vector4f(0.0f, -1.0f, 0.0f, 1.0f), Vector4f(0.0f, 1.0f, 0.0f, 1.0f)}, // y = 1
+        {Vector4f(0.0f, 0.0f, 1.0f, 1.0f), Vector4f(0.0f, 0.0f, -1.0f, 1.0f)}, // z = -1
+        {Vector4f(0.0f, 0.0f, -1.0f, 1.0f), Vector4f(0.0f, 0.0f, 1.0f, 1.0f)}  // z = 1
+    };
+
+    for (const auto &plane : clipPlanes)
+    {
+        vector<Vector4f> output;
+        const Vector4f &planeNormal = plane.first;
+        const Vector4f &planePoint = plane.second;
+
+        for (size_t i = 0; i < polygon.size(); i++)
+        {
+            const Vector4f &current = polygon[i];
+            const Vector4f &next = polygon[(i + 1) % polygon.size()];
+
+            float currentSide = (current - planePoint).Dot(planeNormal);
+            float nextSide = (next - planePoint).Dot(planeNormal);
+
+            if (currentSide >= 0) // 当前点在平面内或平面上
+                output.push_back(current);
+
+            if (currentSide * nextSide < 0) // 线段与平面相交
+            {
+                float t = currentSide / (currentSide - nextSide);
+                Vector4f intersection = current.Lerp(next, t);
+                output.push_back(intersection);
+            }
+        }
+
+        polygon = output;
+        if (polygon.empty())
+            break;
     }
 }
 

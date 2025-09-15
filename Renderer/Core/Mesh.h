@@ -11,7 +11,7 @@ class Mesh
 public:
     Transform transform;
     vector<Vertex> vertexBuffer;
-    vector<Vector3f> indexBuffer;
+    vector<Vector3i> indexBuffer;
     
 private:
 
