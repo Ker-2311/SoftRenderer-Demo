@@ -42,6 +42,8 @@ public:
     Vector2i oPos;
     // 像素属性
     unordered_map<AttributeType, Vector4f> attributes;
+    // 深度值
+    float depth;
 };
 
 // 顶点着色器基类

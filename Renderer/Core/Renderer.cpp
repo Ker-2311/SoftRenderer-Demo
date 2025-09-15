@@ -4,14 +4,15 @@ Renderer::Renderer(HDC hdc) : m_hdc(hdc)
 {
     m_width = GetDeviceCaps(hdc, HORZRES);
     m_height = GetDeviceCaps(hdc, VERTRES);
+    m_zbuffer.resize(m_height,vector<float>(m_width,1));
 }
 
-void Renderer::VertexShaderStage(const vector<Vertex> &vertexList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
+void Renderer::VertexShaderStage(const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
 {
-    outputList.resize(vertexList.size());
-    for (int i = 0; i < vertexList.size(); i++)
+    outputList.resize(inputList.size());
+    for (int i = 0; i < inputList.size(); i++)
     {
-        shared_ptr<BaseVertexOutput> vertexOutput = shader->Process(vertexList[i]);
+        shared_ptr<BaseVertexOutput> vertexOutput = shader->Process(inputList[i]);
         // 透视除法
         float w = vertexOutput->oPos.w;
         vertexOutput->oPos = vertexOutput->oPos / w;
@@ -92,15 +93,15 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
         shared_ptr<BaseVertexOutput> v1 = triangle->V1;
         shared_ptr<BaseVertexOutput> v2 = triangle->V2;
 
-        // 转换为屏幕坐标
+        // 转换为屏幕坐标（Y轴翻转）
         int x0 = static_cast<int>((v0->oPos.x + 1.0f) * m_width / 2.0f);
-        int y0 = static_cast<int>((v0->oPos.y + 1.0f) * m_height / 2.0f);
+        int y0 = static_cast<int>((1.0f - v0->oPos.y) * m_height / 2.0f); // 注意：1-y 翻转Y轴
         int x1 = static_cast<int>((v1->oPos.x + 1.0f) * m_width / 2.0f);
-        int y1 = static_cast<int>((v1->oPos.y + 1.0f) * m_height / 2.0f);
+        int y1 = static_cast<int>((1.0f - v1->oPos.y) * m_height / 2.0f);
         int x2 = static_cast<int>((v2->oPos.x + 1.0f) * m_width / 2.0f);
-        int y2 = static_cast<int>((v2->oPos.y + 1.0f) * m_height / 2.0f);
+        int y2 = static_cast<int>((1.0f - v2->oPos.y) * m_height / 2.0f);
 
-        // 创建包围盒
+        // 创建包围盒   
         int xMax = max(max(x0, x1), x2);
         int yMax = max(max(y0, y1), y2);
         int xMin = min(min(x0, x1), x2);
@@ -155,6 +156,37 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
                 outputList.push_back(pixelInput);
             }
         }
+    }
+}
+
+void Renderer::PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader)
+{
+    outputList.resize(inputList.size());
+    for (int i = 0; i < inputList.size(); i++)
+    {
+        shared_ptr<BasePixelOutput> pixelOutput = shader->Process(*inputList[i]);
+        outputList[i] = pixelOutput;
+    }
+}
+
+void Renderer::OutputDraw(const vector<shared_ptr<BasePixelOutput>> &outputList)
+{
+    for (auto output : outputList)
+    {
+        // 确保颜色输出
+        if (output->attributes.count(AttributeType::Color) > 0)
+        {
+            Vector2i pos = output->oPos;
+            Vector4f color = output->attributes[AttributeType::Color];
+            // 深度测试
+            if (output->depth < m_zbuffer[pos.y][pos.x])
+            {
+                m_zbuffer[pos.y][pos.x] = output->depth;
+                // TODO：输出缓冲区,这里为了方便直接输出
+                DrawPixel(pos.x,pos.y,RGB(color.x,color.y,color.z));
+            }
+        }
+
     }
 }
 

@@ -31,9 +31,11 @@ public:
     void ClipStage(vector<shared_ptr<Triangle>> &primitiveList);
     // 光栅化阶段
     void Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vector<shared_ptr<PixelInput>> &outputList);
-
-    void PixelShaderStage(const vector<shared_ptr<PixelInput>> &outputList);
-
+    // 像素着色器阶段
+    void PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader);
+    // 输出绘制阶段
+    void OutputDraw(const vector<shared_ptr<BasePixelOutput>> &outputList);
+    
     void DrawLine(int x0, int y0, int x1, int y1, COLORREF color0, COLORREF color1);
     // 通过重心坐标绘制三角形
     void DrawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, COLORREF color0, COLORREF color1, COLORREF color2);
@@ -42,7 +44,7 @@ private:
     HDC m_hdc;
     int m_width;
     int m_height;
-    // float m_zbuffer[][];
+    vector<vector<float>> m_zbuffer;
 
 private:
     void DrawPixel(int x, int y, COLORREF color);
