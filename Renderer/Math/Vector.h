@@ -179,6 +179,12 @@ struct VectorTypeBase
 		}
 		return res;
 	}
+
+	inline Derived Lerp(const Derived &b, T t) const
+	{
+		t = std::clamp(t, static_cast<T>(0), static_cast<T>(1));
+		return return static_cast<const Derived&>(*this) + (b - static_cast<const Derived&>(*this)) * t;
+	}
 };
 
 template <typename T>
@@ -263,6 +269,7 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Sum;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Dot;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Normalize;
+	using VectorTypeBase<T, 4, Vector4Type<T>>::Lerp;
 };
 
 typedef Vector2Type<float> Vector2f;
@@ -277,5 +284,4 @@ typedef Vector4Type<float> Color;
 // 定义一些全局的函数
 namespace Vector
 {
-
 }
