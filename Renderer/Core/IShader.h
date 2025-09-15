@@ -50,6 +50,8 @@ public:
 class VertexShader
 {
 public:
+    Matrix4x4f MVPMatrix;
+public:
     virtual ~VertexShader() = default;
     // 必须要做的事：将坐标扩展为(x,y,z,1)，并且乘MVP矩阵
     virtual shared_ptr<BaseVertexOutput> Process(const Vertex &vertex) = 0;
