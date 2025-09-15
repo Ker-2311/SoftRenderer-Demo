@@ -3,6 +3,10 @@
 #include "Matrix.h"
 #include <algorithm>
 
+template <typename T> struct Vector2Type;
+template <typename T> struct Vector3Type;
+template <typename T> struct Vector4Type;
+
 // 定义通用Vector类型，使用CRTP模式
 template <typename T, size_t N, typename Derived>
 struct VectorTypeBase
@@ -253,26 +257,26 @@ struct Vector3Type : public VectorTypeBase<T, 3, Vector3Type<T>>
 		y = _y;
 		z = _z;
 	}
-	Vector3Type(const Vector4Type &v4) : VectorTypeBase<T, 3, Vector3Type<T>>()
+	Vector3Type(const Vector4Type<T> &v4) : VectorTypeBase<T, 3, Vector3Type<T>>()
 	{
 		this.data = v4.data;
 		w = 0;
 	}
-	Vector3Type(const Vector2Type &v2) : VectorTypeBase<T, 3, Vector3Type<T>>()
+	Vector3Type(const Vector2Type<T> &v2) : VectorTypeBase<T, 3, Vector3Type<T>>()
 	{
 		this.data = v2.data;
 		z = 0;
 		w = 0;
 	}
 
-	Vector3Type &operator=(const Vector2Type &v2)
+	Vector3Type &operator=(const Vector2Type<T> &v2)
 	{
 		this.data = v2.data;
 		z = 0;
 		w = 0;
 		return *this;
 	}
-	Vector3Type &operator=(const Vector4Type &v4)
+	Vector3Type &operator=(const Vector4Type<T> &v4)
 	{
 		this.data = v4.data;
 		w = 0;
@@ -307,26 +311,26 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 		z = _z;
 		w = _w;
 	}
-	Vector4Type(const Vector3Type &v3) : VectorTypeBase<T, 4, Vector4Type<T>>()
+	Vector4Type(const Vector3Type<T> &v3) : VectorTypeBase<T, 4, Vector4Type<T>>()
 	{
 		this.data = v3.data;
 		w = 0;
 	}
-	Vector4Type(const Vector2Type &v2) : VectorTypeBase<T, 4, Vector4Type<T>>()
+	Vector4Type(const Vector2Type<T> &v2) : VectorTypeBase<T, 4, Vector4Type<T>>()
 	{
 		this.data = v2.data;
 		z = 0;
 		w = 0;
 	}
 
-	Vector4Type &operator=(const Vector2Type &v2)
+	Vector4Type &operator=(const Vector2Type<T> &v2)
 	{
 		this.data = v2.data;
 		z = 0;
 		w = 0;
 		return *this;
 	}
-	Vector4Type &operator=(const Vector3Type &v3)
+	Vector4Type &operator=(const Vector3Type<T> &v3)
 	{
 		this.data = v3.data;
 		w = 0;
