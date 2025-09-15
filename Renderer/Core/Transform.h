@@ -14,7 +14,7 @@ public:
     void Rotate(const Vector3f &rotAngle) { rotation = rotation + rotAngle; }
     void Scale(const Vector3f &s) { scale = scale + s; }
     // 获取世界变换矩阵
-    Matrix4x4f GetModelToWorldMatrix()
+    Matrix4x4f GetModelToWorldMatrix() const
     {
         Matrix4x4f S = {scale.x, 0, 0, 0,
                         0, scale.y, 0, 0,
@@ -30,7 +30,7 @@ public:
     }
     Matrix4x4f GetRotationMatrix() {return CreateRotationMatrix(rotation);}
     Transform(Vector3f pos, Vector3f rot, Vector3f s) : position(pos), rotation(rot), scale(s) {}
-    Transform();
+    Transform() {}
 
 private:
     // 根据欧拉角创建旋转矩阵（XYZ 顺序）

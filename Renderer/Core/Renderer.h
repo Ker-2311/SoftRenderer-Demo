@@ -4,6 +4,9 @@
 #include <vector>
 #include <assert.h>
 #include "IShader.h"
+#include "Camera.h"
+#include "Shaders/DefaultShader.h"
+#include "Transform.h"
 #include <memory>
 
 using namespace std;
@@ -25,7 +28,7 @@ public:
     Renderer(HDC hdc);
 
     // 顶点着色阶段(因为在CPU上渲染所以没有IA阶段)
-    void VertexShaderStage(const vector<Vertex> &vertexList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader);
+    void VertexShaderStage(const Transform &trans,const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader = nullptr);
     // 图元装配阶段
     void PrimitiveAssembly(const vector<shared_ptr<BaseVertexOutput>> &vertexOutputList,const vector<Vector3i> &indexList,vector<shared_ptr<Triangle>> &primitiveList);
     // 裁切阶段
@@ -33,7 +36,7 @@ public:
     // 光栅化阶段
     void Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vector<shared_ptr<PixelInput>> &outputList);
     // 像素着色器阶段
-    void PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader);
+    void PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader = nullptr);
     // 输出绘制阶段
     void OutputDraw(const vector<shared_ptr<BasePixelOutput>> &outputList);
     
@@ -45,6 +48,7 @@ private:
     HDC m_hdc;
     int m_width;
     int m_height;
+    Camera m_camera;
     vector<vector<float>> m_zbuffer;
 
 private:

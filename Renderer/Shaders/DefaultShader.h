@@ -1,6 +1,6 @@
 #pragma once
 #include "Core/IShader.h"
-#include <Vertex.h>
+#include "Core/Vertex.h"
 
 class DefaultVS : public VertexShader
 {

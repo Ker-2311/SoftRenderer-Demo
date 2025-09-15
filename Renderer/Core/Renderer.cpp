@@ -12,8 +12,10 @@ Renderer::Renderer(HDC hdc) : m_hdc(hdc)
     m_zbuffer.resize(m_height, vector<float>(m_width, 1));
 }
 
-void Renderer::VertexShaderStage(const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
+void Renderer::VertexShaderStage(const Transform &trans,const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
 {
+    if(!shader) shader = make_shared<DefaultVS>();
+    shader->MVPMatrix = trans.GetModelToWorldMatrix() * m_camera.GetViewMatrix() * m_camera.GetPerspectiveMatrix();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
     {
@@ -167,6 +169,7 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
 
 void Renderer::PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader)
 {
+    if(!shader) shader = make_shared<DefaultPS>();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
     {

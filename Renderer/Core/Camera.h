@@ -40,7 +40,7 @@ public:
 	}
 
 	// 透视投影矩阵
-	Matrix4x4f Perspective() const
+	Matrix4x4f GetPerspectiveMatrix() const
 	{
 		float tanHalfFov = tan(fov / 2.0f);
 		float range = farPlane - nearPlane;
@@ -63,15 +63,15 @@ public:
 	}
 
 	// 正交投影矩阵
-	static Matrix4x4f Orthographic(float left, float right, float bottom, float top, float near, float far)
+	Matrix4x4f GetOrthographicMatrix(float left, float right, float bottom, float top)
 	{
 		Matrix4x4f proj;
 		proj.data[0][0] = 2.0f / (right - left);
 		proj.data[1][1] = 2.0f / (top - bottom);
-		proj.data[2][2] = -2.0f / (far - near);
+		proj.data[2][2] = -2.0f / (farPlane - nearPlane);
 		proj.data[3][0] = -(right + left) / (right - left);
 		proj.data[3][1] = -(top + bottom) / (top - bottom);
-		proj.data[3][2] = -(far + near) / (far - near);
+		proj.data[3][2] = -(farPlane + nearPlane) / (farPlane - nearPlane);
 		proj.data[3][3] = 1.0f;
 
 		return proj;

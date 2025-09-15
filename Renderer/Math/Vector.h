@@ -271,14 +271,17 @@ struct Vector3Type : public VectorTypeBase<T, 3, Vector3Type<T>>
 
 	Vector3Type &operator=(const Vector2Type<T> &v2)
 	{
-		this.data = v2.data;
+		x = v2.x;
+		y = v2.y;
 		z = 0;
 		w = 0;
 		return *this;
 	}
 	Vector3Type &operator=(const Vector4Type<T> &v4)
 	{
-		this.data = v4.data;
+		x = v4.x;
+		y = v4.y;
+		z = v4.z;
 		w = 0;
 		return *this;
 	}
@@ -325,14 +328,17 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 
 	Vector4Type &operator=(const Vector2Type<T> &v2)
 	{
-		this.data = v2.data;
+		x = v2.x;
+		y = v2.y;
 		z = 0;
 		w = 0;
 		return *this;
 	}
 	Vector4Type &operator=(const Vector3Type<T> &v3)
 	{
-		this.data = v3.data;
+		x = v3.x;
+		y = v3.y;
+		z = v3.z;
 		w = 0;
 		return *this;
 	}
