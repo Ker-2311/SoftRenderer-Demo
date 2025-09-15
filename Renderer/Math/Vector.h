@@ -1,6 +1,7 @@
 #pragma once
 #include <iterator>
 #include "Matrix.h"
+#include <algorithm>
 
 // 定义通用Vector类型，使用CRTP模式
 template <typename T, size_t N, typename Derived>
@@ -183,7 +184,7 @@ struct VectorTypeBase
 	inline Derived Lerp(const Derived &b, T t) const
 	{
 		t = std::clamp(t, static_cast<T>(0), static_cast<T>(1));
-		return return static_cast<const Derived&>(*this) + (b - static_cast<const Derived&>(*this)) * t;
+		return static_cast<const Derived&>(*this) + (b - static_cast<const Derived&>(*this)) * t;
 	}
 };
 
@@ -258,8 +259,19 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 		z = _z;
 		w = _w;
 	}
+	Vector4Type(const VectorTypeBase<T, 3, Vector3Type<T>> &v3):VectorTypeBase<T, 4, Vector4Type<T>>()
+	{
+		this.data = v3.data;
+		w = 0;
+	}
 
 	// 使用基类的运算符重载
+	VectorTypeBase<T, 4, Vector4Type<T>>& operator=(const VectorTypeBase<T, 3, Vector3Type<T>> &v3)
+	{
+		this.data = v3.data;
+		w = 0;
+		return *this;
+	}
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator=;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator+;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator-;
