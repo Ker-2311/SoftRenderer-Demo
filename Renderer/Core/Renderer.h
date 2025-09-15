@@ -2,6 +2,7 @@
 #include "Windows/WindowsPlatform.h"
 #include "Vertex.h"
 #include <vector>
+#include <assert.h>
 #include "IShader.h"
 #include <memory>
 

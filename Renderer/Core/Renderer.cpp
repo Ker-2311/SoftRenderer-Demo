@@ -2,9 +2,14 @@
 
 Renderer::Renderer(HDC hdc) : m_hdc(hdc)
 {
+    assert(hdc != nullptr && "Invalid HDC provided to Renderer constructor");
     m_width = GetDeviceCaps(hdc, HORZRES);
     m_height = GetDeviceCaps(hdc, VERTRES);
-    m_zbuffer.resize(m_height,vector<float>(m_width,1));
+
+    assert(m_width > 0 && "Invalid screen width");
+    assert(m_height > 0 && "Invalid screen height");
+
+    m_zbuffer.resize(m_height, vector<float>(m_width, 1));
 }
 
 void Renderer::VertexShaderStage(const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
@@ -12,7 +17,8 @@ void Renderer::VertexShaderStage(const vector<Vertex> &inputList, vector<shared_
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
     {
-        shared_ptr<BaseVertexOutput> vertexOutput = shader->Process(inputList[i]);
+        shared_ptr<BaseVertexOutput> vertexOutput;
+        vertexOutput = shader->Process(inputList[i]);
         // 透视除法
         float w = vertexOutput->oPos.w;
         vertexOutput->oPos = vertexOutput->oPos / w;
@@ -101,7 +107,7 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
         int x2 = static_cast<int>((v2->oPos.x + 1.0f) * m_width / 2.0f);
         int y2 = static_cast<int>((1.0f - v2->oPos.y) * m_height / 2.0f);
 
-        // 创建包围盒   
+        // 创建包围盒
         int xMax = max(max(x0, x1), x2);
         int yMax = max(max(y0, y1), y2);
         int xMin = min(min(x0, x1), x2);
@@ -183,10 +189,9 @@ void Renderer::OutputDraw(const vector<shared_ptr<BasePixelOutput>> &outputList)
             {
                 m_zbuffer[pos.y][pos.x] = output->depth;
                 // TODO：输出缓冲区,这里为了方便直接输出
-                DrawPixel(pos.x,pos.y,RGB(color.x,color.y,color.z));
+                DrawPixel(pos.x, pos.y, RGB(color.x, color.y, color.z));
             }
         }
-
     }
 }
 

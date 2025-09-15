@@ -23,7 +23,8 @@ int WINAPI WinMain(
     HDC hdc = GetDC(hwnd);
     Renderer renderer(hdc);
     // renderer.DrawLine(0,0,1000,1000,RGB(0,255,255),RGB(255,0,0));
-    
+    // renderer.DrawTriangle(width / 2, height / 4, width / 4, height * 3 / 4, width * 3 / 4, height * 3 / 4, RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255));
+
 
     while (WindowsPlatform::ProcessMessages())
     {
@@ -39,7 +40,8 @@ int WINAPI WinMain(
         }
         else if (WindowsPlatform::IsKeyPressed(VK_SPACE))
         {
-            renderer.DrawTriangle(width / 2, height / 4, width / 4, height * 3 / 4, width * 3 / 4, height * 3 / 4, RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255));
+            // 进行渲染
+            
         }
     }
 
