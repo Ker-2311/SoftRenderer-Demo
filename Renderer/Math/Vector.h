@@ -184,12 +184,12 @@ struct VectorTypeBase
 	inline Derived Lerp(const Derived &b, T t) const
 	{
 		t = std::clamp(t, static_cast<T>(0), static_cast<T>(1));
-		return static_cast<const Derived&>(*this) + (b - static_cast<const Derived&>(*this)) * t;
+		return static_cast<const Derived &>(*this) + (b - static_cast<const Derived &>(*this)) * t;
 	}
 };
 
 template <typename T>
-struct Vector2Type : private VectorTypeBase<T, 2, Vector2Type<T>>
+struct Vector2Type : public VectorTypeBase<T, 2, Vector2Type<T>>
 {
 	using VectorTypeBase<T, 2, Vector2Type<T>>::x;
 	using VectorTypeBase<T, 2, Vector2Type<T>>::y;
@@ -201,7 +201,31 @@ struct Vector2Type : private VectorTypeBase<T, 2, Vector2Type<T>>
 		x = _x;
 		y = _y;
 	}
+	Vector2Type(const Vector3Type<T> &v3) : VectorTypeBase<T, 2, Vector2Type<T>>()
+	{
+		x = v3.x;
+		y = v3.y;
+	}
 
+	Vector2Type(const Vector4Type<T> &v4) : VectorTypeBase<T, 2, Vector2Type<T>>()
+	{
+		x = v4.x;
+		y = v4.y;
+	}
+
+	Vector2Type &operator=(const Vector3Type<T> &v3)
+	{
+		x = v3.x;
+		y = v3.y;
+		return *this;
+	}
+
+	Vector2Type &operator=(const Vector4Type<T> &v4)
+	{
+		x = v4.x;
+		y = v4.y;
+		return *this;
+	}
 	// 使用基类的运算符重载
 	using VectorTypeBase<T, 2, Vector2Type<T>>::operator=;
 	using VectorTypeBase<T, 2, Vector2Type<T>>::operator+;
@@ -229,7 +253,31 @@ struct Vector3Type : public VectorTypeBase<T, 3, Vector3Type<T>>
 		y = _y;
 		z = _z;
 	}
+	Vector3Type(const Vector4Type &v4) : VectorTypeBase<T, 3, Vector3Type<T>>()
+	{
+		this.data = v4.data;
+		w = 0;
+	}
+	Vector3Type(const Vector2Type &v2) : VectorTypeBase<T, 3, Vector3Type<T>>()
+	{
+		this.data = v2.data;
+		z = 0;
+		w = 0;
+	}
 
+	Vector3Type &operator=(const Vector2Type &v2)
+	{
+		this.data = v2.data;
+		z = 0;
+		w = 0;
+		return *this;
+	}
+	Vector3Type &operator=(const Vector4Type &v4)
+	{
+		this.data = v4.data;
+		w = 0;
+		return *this;
+	}
 	// 使用基类的运算符重载
 	using VectorTypeBase<T, 3, Vector3Type<T>>::operator=;
 	using VectorTypeBase<T, 3, Vector3Type<T>>::operator+;
@@ -259,19 +307,32 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 		z = _z;
 		w = _w;
 	}
-	Vector4Type(const VectorTypeBase<T, 3, Vector3Type<T>> &v3):VectorTypeBase<T, 4, Vector4Type<T>>()
+	Vector4Type(const Vector3Type &v3) : VectorTypeBase<T, 4, Vector4Type<T>>()
 	{
 		this.data = v3.data;
 		w = 0;
 	}
+	Vector4Type(const Vector2Type &v2) : VectorTypeBase<T, 4, Vector4Type<T>>()
+	{
+		this.data = v2.data;
+		z = 0;
+		w = 0;
+	}
 
-	// 使用基类的运算符重载
-	VectorTypeBase<T, 4, Vector4Type<T>>& operator=(const VectorTypeBase<T, 3, Vector3Type<T>> &v3)
+	Vector4Type &operator=(const Vector2Type &v2)
+	{
+		this.data = v2.data;
+		z = 0;
+		w = 0;
+		return *this;
+	}
+	Vector4Type &operator=(const Vector3Type &v3)
 	{
 		this.data = v3.data;
 		w = 0;
 		return *this;
 	}
+	// 使用基类的运算符重载
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator=;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator+;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::operator-;
