@@ -30,6 +30,8 @@ public:
     }
     Matrix4x4f GetRotationMatrix() {return CreateRotationMatrix(rotation);}
     Transform(Vector3f pos, Vector3f rot, Vector3f s) : position(pos), rotation(rot), scale(s) {}
+    Transform(Vector3f pos, Vector3f rot) : position(pos), rotation(rot) {}
+    Transform(Vector3f pos) : position(pos) {}
     Transform() {}
 
 private:

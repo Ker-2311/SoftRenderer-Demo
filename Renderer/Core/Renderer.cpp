@@ -1,6 +1,6 @@
 #include "Renderer.h"
 
-Renderer::Renderer(HDC hdc) : m_hdc(hdc)
+Renderer::Renderer(HDC hdc, Camera camera) : m_hdc(hdc), m_camera(camera)
 {
     assert(hdc != nullptr && "Invalid HDC provided to Renderer constructor");
     m_width = GetDeviceCaps(hdc, HORZRES);
@@ -12,9 +12,24 @@ Renderer::Renderer(HDC hdc) : m_hdc(hdc)
     m_zbuffer.resize(m_height, vector<float>(m_width, 1));
 }
 
-void Renderer::VertexShaderStage(const Transform &trans,const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
+void Renderer::Pass(Mesh mesh)
 {
-    if(!shader) shader = make_shared<DefaultVS>();
+    vector<shared_ptr<BaseVertexOutput>> vertexOutput;
+    vector<shared_ptr<Triangle>> primitiveList;
+    vector<shared_ptr<PixelInput>> pixelInput;
+    vector<shared_ptr<BasePixelOutput>> pixelOutput;
+    VertexShaderStage(mesh.transform,mesh.vertexBuffer,vertexOutput,mesh.vs);
+    PrimitiveAssembly(vertexOutput,mesh.indexBuffer,primitiveList);
+    ClipStage(primitiveList);
+    Rasterize(primitiveList,pixelInput);
+    PixelShaderStage(pixelInput,pixelOutput,mesh.ps);
+    OutputDraw(pixelOutput);
+}
+
+void Renderer::VertexShaderStage(const Transform &trans, const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader)
+{
+    if (!shader)
+        shader = make_shared<DefaultVS>();
     shader->MVPMatrix = trans.GetModelToWorldMatrix() * m_camera.GetViewMatrix() * m_camera.GetPerspectiveMatrix();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
@@ -169,7 +184,8 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
 
 void Renderer::PixelShaderStage(const vector<shared_ptr<PixelInput>> &inputList, vector<shared_ptr<BasePixelOutput>> &outputList, shared_ptr<PixelShader> shader)
 {
-    if(!shader) shader = make_shared<DefaultPS>();
+    if (!shader)
+        shader = make_shared<DefaultPS>();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
     {

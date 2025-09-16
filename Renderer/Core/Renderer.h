@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Shaders/DefaultShader.h"
 #include "Transform.h"
+#include "Mesh.h"
 #include <memory>
 
 using namespace std;
@@ -25,9 +26,11 @@ public:
 class Renderer
 {
 public:
-    Renderer(HDC hdc);
+    Renderer(HDC hdc,Camera camera);
 
-    // 顶点着色阶段(因为在CPU上渲染所以没有IA阶段)
+    // 一次完整的渲染过程
+    void Pass(Mesh mesh);
+    // 顶点着色阶段
     void VertexShaderStage(const Transform &trans,const vector<Vertex> &inputList, vector<shared_ptr<BaseVertexOutput>> &outputList, shared_ptr<VertexShader> shader = nullptr);
     // 图元装配阶段
     void PrimitiveAssembly(const vector<shared_ptr<BaseVertexOutput>> &vertexOutputList,const vector<Vector3i> &indexList,vector<shared_ptr<Triangle>> &primitiveList);
