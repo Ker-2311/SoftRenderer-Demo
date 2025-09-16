@@ -32,6 +32,7 @@ void Renderer::VertexShaderStage(const Transform &trans, const vector<Vertex> &i
         shader = make_shared<DefaultVS>();
     
     // 设置MVP矩阵
+    shader->M = trans.GetModelToWorldMatrix();
     shader->MVPMatrix = trans.GetModelToWorldMatrix() * m_camera.GetViewMatrix() * m_camera.GetPerspectiveMatrix();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)

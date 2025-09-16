@@ -171,9 +171,9 @@ struct VectorTypeBase
 		return Derived{};
 	}
 
-	inline Derived Normalize()
+	inline Derived Normalized()
 	{
-		T len = std::sqrt(Dot(this));
+		T len = std::sqrt(Dot(static_cast<const Derived &>(*this)));
 		if (len == 0)
 			throw std::runtime_error("Cannot normalize zero vector");
 
@@ -239,7 +239,7 @@ struct Vector2Type : public VectorTypeBase<T, 2, Vector2Type<T>>
 	// 通用向量操作
 	using VectorTypeBase<T, 2, Vector2Type<T>>::Sum;
 	using VectorTypeBase<T, 2, Vector2Type<T>>::Dot;
-	using VectorTypeBase<T, 2, Vector2Type<T>>::Normalize;
+	using VectorTypeBase<T, 2, Vector2Type<T>>::Normalized;
 };
 
 template <typename T>
@@ -297,7 +297,7 @@ struct Vector3Type : public VectorTypeBase<T, 3, Vector3Type<T>>
 	using VectorTypeBase<T, 3, Vector3Type<T>>::Sum;
 	using VectorTypeBase<T, 3, Vector3Type<T>>::Dot;
 	using VectorTypeBase<T, 3, Vector3Type<T>>::Cross;
-	using VectorTypeBase<T, 3, Vector3Type<T>>::Normalize;
+	using VectorTypeBase<T, 3, Vector3Type<T>>::Normalized;
 };
 
 template <typename T>
@@ -353,7 +353,7 @@ struct Vector4Type : public VectorTypeBase<T, 4, Vector4Type<T>>
 	// 通用向量操作
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Sum;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Dot;
-	using VectorTypeBase<T, 4, Vector4Type<T>>::Normalize;
+	using VectorTypeBase<T, 4, Vector4Type<T>>::Normalized;
 	using VectorTypeBase<T, 4, Vector4Type<T>>::Lerp;
 };
 

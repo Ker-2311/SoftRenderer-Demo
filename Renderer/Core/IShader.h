@@ -5,12 +5,13 @@
 
 using namespace std;
 
-// 可用的顶点属性类型
+// 可用的顶点属性类型基类
 enum class AttributeType
 {
     Color,
     Normal,
     UV,
+    WorldPos
 };
 
 // 顶点着色器输出基类,着色器可以继承该类
@@ -50,6 +51,7 @@ public:
 class VertexShader
 {
 public:
+    Matrix4x4f M;
     Matrix4x4f MVPMatrix;
 public:
     virtual ~VertexShader() = default;
@@ -60,6 +62,9 @@ public:
 // 像素着色器基类
 class PixelShader
 {
+public:
+    Vector3f ViewDir;
+    Vector3f LightDir;
 public:
     virtual ~PixelShader() = default;
     virtual shared_ptr<BasePixelOutput> Process(const PixelInput &pixel) = 0;
