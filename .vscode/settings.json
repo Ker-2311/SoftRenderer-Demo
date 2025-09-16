@@ -52,7 +52,8 @@
         "xtr1common": "cpp",
         "xutility": "cpp",
         "unordered_map": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "optional": "cpp"
     },
     "C_Cpp.default.includePath": [
         "${workspaceFolder}\\Renderer",

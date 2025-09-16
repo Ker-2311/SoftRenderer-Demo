@@ -18,11 +18,11 @@ void Renderer::Pass(Mesh mesh)
     vector<shared_ptr<Triangle>> primitiveList;
     vector<shared_ptr<PixelInput>> pixelInput;
     vector<shared_ptr<BasePixelOutput>> pixelOutput;
-    VertexShaderStage(mesh.transform,mesh.vertexBuffer,vertexOutput,mesh.vs);
-    PrimitiveAssembly(vertexOutput,mesh.indexBuffer,primitiveList);
+    VertexShaderStage(mesh.transform, mesh.vertexBuffer, vertexOutput, mesh.vs);
+    PrimitiveAssembly(vertexOutput, mesh.indexBuffer, primitiveList);
     ClipStage(primitiveList);
-    Rasterize(primitiveList,pixelInput);
-    PixelShaderStage(pixelInput,pixelOutput,mesh.ps);
+    Rasterize(primitiveList, pixelInput);
+    PixelShaderStage(pixelInput, pixelOutput, mesh.ps);
     OutputDraw(pixelOutput);
 }
 
@@ -30,6 +30,12 @@ void Renderer::VertexShaderStage(const Transform &trans, const vector<Vertex> &i
 {
     if (!shader)
         shader = make_shared<DefaultVS>();
+    // MVP矩阵有问题
+    Matrix4x4f M,V,P;
+    M  = trans.GetModelToWorldMatrix();
+    V = m_camera.GetViewMatrix();
+    P = m_camera.GetPerspectiveMatrix();
+    Matrix4x4f MP = M*P;
     shader->MVPMatrix = trans.GetModelToWorldMatrix() * m_camera.GetViewMatrix() * m_camera.GetPerspectiveMatrix();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
