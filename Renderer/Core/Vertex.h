@@ -10,7 +10,7 @@ public:
     Vector2f uv = Vector2f(0, 0);
 
 public:
-    Vertex();
+    Vertex(){}
     Vertex(Vector3f p) : pos(p) {}
     Vertex(Vector3f p, Vector3f c) : pos(p), color(c) {}
     Vertex(Vector3f p, Vector3f c, Vector3f normal) : pos(p), color(c), normal(normal) {}
