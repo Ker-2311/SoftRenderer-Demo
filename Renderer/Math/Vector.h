@@ -259,7 +259,9 @@ struct Vector3Type : public VectorTypeBase<T, 3, Vector3Type<T>>
 	}
 	Vector3Type(const Vector4Type<T> &v4) : VectorTypeBase<T, 3, Vector3Type<T>>()
 	{
-		this.data = v4.data;
+		x = v4.x;
+		y = v4.y;
+		z = v4.z;
 		w = 0;
 	}
 	Vector3Type(const Vector2Type<T> &v2) : VectorTypeBase<T, 3, Vector3Type<T>>()

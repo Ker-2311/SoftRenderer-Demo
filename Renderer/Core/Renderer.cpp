@@ -111,12 +111,25 @@ void Renderer::Rasterize(const vector<shared_ptr<Triangle>> &primitiveList, vect
     for (int i = 0; i < primitiveList.size(); i++)
     {
         shared_ptr<Triangle> triangle = primitiveList[i];
-        // TODO: 背面剔除
-
-        // 透视矫正插值
         shared_ptr<BaseVertexOutput> v0 = triangle->V0;
         shared_ptr<BaseVertexOutput> v1 = triangle->V1;
         shared_ptr<BaseVertexOutput> v2 = triangle->V2;
+        // 背面剔除
+        // 计算三角形的边向量
+        Vector3f edge1 = v1->oPos - v0->oPos;
+        Vector3f edge2 = v2->oPos - v0->oPos;
+        
+        // 计算未归一化的法线（叉积）
+        Vector3f normal = edge1.Cross(edge2);
+        
+        // 计算观察方向（从相机指向三角形）
+        Vector3f viewDir = v0->oPos * -1; // 假设相机在原点
+        
+        // 点积判断是否背面
+        if (normal.Dot(viewDir) <= 0.0f) {
+            continue; // 背面，跳过该三角形
+        }
+
 
         // 转换为屏幕坐标（Y轴翻转）
         int x0 = static_cast<int>((v0->oPos.x + 1.0f) * m_width / 2.0f);
