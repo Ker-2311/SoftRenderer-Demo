@@ -30,12 +30,8 @@ void Renderer::VertexShaderStage(const Transform &trans, const vector<Vertex> &i
 {
     if (!shader)
         shader = make_shared<DefaultVS>();
-    // MVP矩阵有问题
-    Matrix4x4f M,V,P;
-    M  = trans.GetModelToWorldMatrix();
-    V = m_camera.GetViewMatrix();
-    P = m_camera.GetPerspectiveMatrix();
-    Matrix4x4f MP = M*P;
+    
+    // 设置MVP矩阵
     shader->MVPMatrix = trans.GetModelToWorldMatrix() * m_camera.GetViewMatrix() * m_camera.GetPerspectiveMatrix();
     outputList.resize(inputList.size());
     for (int i = 0; i < inputList.size(); i++)
@@ -208,7 +204,7 @@ void Renderer::OutputDraw(const vector<shared_ptr<BasePixelOutput>> &outputList)
         if (output->attributes.count(AttributeType::Color) > 0)
         {
             Vector2i pos = output->oPos;
-            Vector4f color = output->attributes[AttributeType::Color];
+            Vector4f color = output->attributes[AttributeType::Color] * 255;
             // 深度测试
             if (output->depth < m_zbuffer[pos.y][pos.x])
             {

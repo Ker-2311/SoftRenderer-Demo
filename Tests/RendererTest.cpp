@@ -22,23 +22,23 @@ int WINAPI WinMain(
     double lastTime = WindowsPlatform::GetHighResolutionTime();
     HWND hwnd = WindowsPlatform::GetHWND();
     HDC hdc = GetDC(hwnd);
-    Camera *camera = new Camera(Transform(Vector3f(1,2,1),Vector3f(60,60,60)));
+    Camera *camera = new Camera(Transform(Vector3f(0,0,0),Vector3f(0,0,0)));
     Renderer renderer(hdc, *camera);
     // renderer.DrawLine(0,0,1000,1000,RGB(0,255,255),RGB(255,0,0));
     // renderer.DrawTriangle(width / 2, height / 4, width / 4, height * 3 / 4, width * 3 / 4, height * 3 / 4, RGB(255, 0, 0), RGB(0, 255, 0), RGB(0, 0, 255));
 
     Mesh *cubeMesh = new Mesh();
-    cubeMesh->transform = Transform(Vector3f(0, 0, 0),Vector3f(0,0,0));
+    cubeMesh->transform = Transform(Vector3f(0, 0, 5),Vector3f(0,0,0));
 
     vector<Vertex> vertexBuffer(8);
-    vertexBuffer[0] = Vertex(Vector3f(-1, -1, -1));  // 0: 左-下-前
-    vertexBuffer[1] = Vertex(Vector3f( 1, -1, -1));  // 1: 右-下-前
-    vertexBuffer[2] = Vertex(Vector3f( 1,  1, -1));  // 2: 右-上-前
-    vertexBuffer[3] = Vertex(Vector3f(-1,  1, -1));  // 3: 左-上-前
-    vertexBuffer[4] = Vertex(Vector3f(-1, -1,  1));  // 4: 左-下-后
-    vertexBuffer[5] = Vertex(Vector3f( 1, -1,  1));  // 5: 右-下-后
-    vertexBuffer[6] = Vertex(Vector3f( 1,  1,  1));  // 6: 右-上-后
-    vertexBuffer[7] = Vertex(Vector3f(-1,  1,  1));  // 7: 左-上-后
+    vertexBuffer[0] = Vertex(Vector3f(-1, -1, -1),Vector3f(0, 0, 0));  // 0: 左-下-前
+    vertexBuffer[1] = Vertex(Vector3f( 1, -1, -1),Vector3f(0, 0, 0));  // 1: 右-下-前
+    vertexBuffer[2] = Vertex(Vector3f( 1,  1, -1),Vector3f(0, 0, 0));  // 2: 右-上-前
+    vertexBuffer[3] = Vertex(Vector3f(-1,  1, -1),Vector3f(0, 0, 0));  // 3: 左-上-前
+    vertexBuffer[4] = Vertex(Vector3f(-1, -1,  1),Vector3f(0, 0, 0));  // 4: 左-下-后
+    vertexBuffer[5] = Vertex(Vector3f( 1, -1,  1),Vector3f(0, 0, 0));  // 5: 右-下-后
+    vertexBuffer[6] = Vertex(Vector3f( 1,  1,  1),Vector3f(0, 0, 0));  // 6: 右-上-后
+    vertexBuffer[7] = Vertex(Vector3f(-1,  1,  1),Vector3f(0, 0, 0));  // 7: 左-上-后
 
     vector<Vector3i> indexBuffer(12);
     // 前
